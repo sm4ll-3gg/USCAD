@@ -21,7 +21,7 @@ private: // Methods
 
     void    drawConstruction(QPainter& painter);
     void    drawCore(QPainter& painter, qreal length, qreal area, qreal xBeginPos);
-    void    drawDistributedLoad(QPainter& painter, int q, qreal xBeginPos);
+    void    drawDistributedLoad(QPainter& painter, qreal length, qreal xBeginPos);
 
 private:
     QVector<Core>   cores{};

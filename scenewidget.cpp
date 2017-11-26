@@ -43,7 +43,7 @@ void SceneWidget::drawConstruction(QPainter &painter)
         drawCore(painter, core.length, core.area, xBeginPos);
 
         if(core.load != 0)
-            drawDistributedLoad(painter, core.load, xBeginPos);
+            drawDistributedLoad(painter, core.length * mToPixScale, xBeginPos);
 
         xBeginPos += core.length * mToPixScale;
     }
@@ -59,10 +59,29 @@ void SceneWidget::drawCore(QPainter &painter, qreal length, qreal area, qreal xB
     painter.drawRect(xBeginPos, yBeginPos, length * mToPixScale, area * mToPixScale);
 }
 
-void SceneWidget::drawDistributedLoad(QPainter &painter, int q, qreal xBeginPos)
+void SceneWidget::drawDistributedLoad(QPainter &painter, qreal length, qreal xBeginPos)
 {
-    painter.setBrush(QBrush(QPixmap("arrow.png")));
-    painter.setPen(QPen(Qt::black, 4));
+    painter.setPen(QPen(Qt::black, 2, Qt::SolidLine));
 
-    painter.drawLine(xBeginPos, rect().height() / 2, xBeginPos + q * mToPixScale, rect().height() / 2);
+    qreal xEndPos = xBeginPos + length;
+
+    qreal yAxisPos = rect().height() / 2;
+    painter.drawLine(xBeginPos, yAxisPos, xEndPos, yAxisPos);
+
+    qreal deltaX = 5;
+    qreal deltaY = 5;
+    qreal step = 10;
+
+    qreal xPos = xBeginPos + step;
+    while (xPos <= xEndPos)
+    {
+        QPointF arrow[3];
+        arrow[0] = QPointF(xPos - deltaX, yAxisPos - deltaY);
+        arrow[1] = QPointF(xPos, yAxisPos);
+        arrow[2] = QPointF(xPos - deltaX, yAxisPos + deltaY);
+
+        painter.drawPolyline(arrow, 3);
+
+        xPos += step;
+    }
 }
