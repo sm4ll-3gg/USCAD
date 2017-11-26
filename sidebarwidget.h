@@ -20,8 +20,15 @@ public:
 
     void    addCore(const Core& core);
 
+signals:
+    void    sgNodeLoadChanged(int node, double f) const;
+
+private slots:
+    void    nodeLoadChanged(QTableWidgetItem* item) const;
+
 private: // Methods
-    void    addTableItem(QTableWidget* table, int row, int column, const QVariant& data);
+    void    addTableItem(QTableWidget* table, int row, int column,
+                         const QVariant& data, bool editable = false);
 
     void    addNode();
 

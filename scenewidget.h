@@ -4,6 +4,7 @@
 #include "declarations.h"
 
 #include <QFrame>
+#include <QMap>
 
 class SceneWidget : public QFrame
 {
@@ -12,6 +13,7 @@ public:
     explicit SceneWidget(QWidget *parent = Q_NULLPTR);
 
     void    addCore(const Core& core);
+    void    addCLoad(int node, double f);
 
 protected:
     void    paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
@@ -20,13 +22,19 @@ private: // Methods
     void    drawAxis(QPainter& painter);
 
     void    drawConstruction(QPainter& painter);
-    void    drawCore(QPainter& painter, qreal length, qreal area, qreal xBeginPos);
-    void    drawDistributedLoad(QPainter& painter, qreal length, qreal xBeginPos);
+    void    drawCore(QPainter& painter, qreal length, qreal area, qreal X_BEGIN_POS);
+    void    drawDistributedLoad(QPainter& painter, qreal length, const double Q, qreal X_BEGIN_POS);
+
+    void    drawConcentratedLoads(QPainter& painter);
+    void    drawConcentratedLoad(QPainter& painter,  const double F, qreal X_BEGIN_POS);
 
 private:
-    QVector<Core>   cores{};
+    QVector<Core>       cores{};
+    QMap<int, double>   cLoads{};
 
-    const int   mToPixScale = 30;
+    const qreal X_BEGIN_POS = 20;
+
+    const int   SCALE = 30;
 };
 
 #endif // SCENEWIDGET_H

@@ -17,6 +17,7 @@ public:
 
 public slots:
     void    addCore(); // Дублирование данных, если будет не лень переписать, используя модель
+    void    addCLoad(int node, double f);
 
 private: // Methods
     void    addCoresTableItem(int row, int column, QVariant data);

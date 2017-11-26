@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->newCoreAction,  &QAction::triggered,  this,   &MainWindow::addCore);
+
+    connect(ui->sidebarWidget,  &SidebarWidget::sgNodeLoadChanged,  this,   &MainWindow::addCLoad);
 }
 
 MainWindow::~MainWindow()
@@ -33,4 +35,9 @@ void MainWindow::addCore()
 
     ui->sidebarWidget->addCore(core);
     ui->srcFrame->addCore(core);
+}
+
+void MainWindow::addCLoad(int node, double f)
+{
+    ui->srcFrame->addCLoad(node, f);
 }
