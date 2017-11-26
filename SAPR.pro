@@ -27,12 +27,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     sidebarwidget.cpp \
-    edit_widgets/newcoredialog.cpp
+    edit_widgets/newcoredialog.cpp \
+    scenewidget.cpp
 
 HEADERS += \
         mainwindow.h \
     sidebarwidget.h \
-    edit_widgets/newcoredialog.h
+    edit_widgets/newcoredialog.h \
+    declarations.h \
+    scenewidget.h
 
 FORMS += \
         mainwindow.ui \

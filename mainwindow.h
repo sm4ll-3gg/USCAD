@@ -15,6 +15,12 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void    addCore(); // Дублирование данных, если будет не лень переписать, используя модель
+
+private: // Methods
+    void    addCoresTableItem(int row, int column, QVariant data);
+
 private:
     Ui::MainWindow *ui;
 };
