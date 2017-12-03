@@ -4,7 +4,9 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 
-// TODO: Фикс удаления стержня
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 namespace Ui {
 class MainWindow;
@@ -19,6 +21,9 @@ public:
     ~MainWindow();
 
 public slots:
+    void    importProject();
+    void    exportProject();
+
     void    addCore();
     void    editCore(int index);
     void    removeCore(int core);
@@ -28,6 +33,13 @@ private slots:
     void    rightSupportToggled(bool checked);
 
 private: // Methods
+    QJsonDocument   serialize() const;
+
+    QJsonArray      serializeCores() const;
+    QJsonObject     serializeCore(int row) const;
+    QJsonArray      serializeLoads() const;
+    QJsonObject     serializeSupports() const;
+
     void    addCoresTableItem(int row, int column, QVariant data);
 
 private:

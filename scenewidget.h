@@ -5,6 +5,7 @@
 
 #include <QFrame>
 #include <QMap>
+#include <QStandardItemModel>
 
 class SceneWidget : public QFrame
 {
