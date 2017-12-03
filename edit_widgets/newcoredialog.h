@@ -17,6 +17,7 @@ class NewCoreDialog : public QDialog
 
 public:
     explicit NewCoreDialog(QWidget *parent = Q_NULLPTR);
+    NewCoreDialog(const Core& data, QWidget* parent = Q_NULLPTR);
     ~NewCoreDialog();
 
     Core    data() const;
@@ -28,6 +29,8 @@ public slots:
 
 private: // Methods
     void    initUi();
+
+    void    setData(const Core& data);
 
     bool    isFieldTextValid(QLineEdit* field) const;
     double  fieldData(QLineEdit* field) const;

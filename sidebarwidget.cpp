@@ -1,15 +1,18 @@
 #include "sidebarwidget.h"
 #include "ui_sidebarwidget.h"
 
+#include <QDebug>
+#include <QMenu>
+
 SidebarWidget::SidebarWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SidebarWidget)
 {
     ui->setupUi(this);
 
-    addNode();
-
-    connect(ui->loadsTable, &QTableWidget::itemChanged, this, &SidebarWidget::nodeLoadChanged);
+    ui->coresTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->coresTable, &QTableWidget::customContextMenuRequested,
+            this,           &SidebarWidget::coresContextMenu);
 }
 
 SidebarWidget::~SidebarWidget()
@@ -17,22 +20,46 @@ SidebarWidget::~SidebarWidget()
     delete ui;
 }
 
+void SidebarWidget::setCoresTableModel(QStandardItemModel *model)
+{
+    coresModel = model;
+
+    ui->coresTable->setModel(model);
+}
+
+void SidebarWidget::setLoadsTableModel(QStandardItemModel *model)
+{
+    loadsModel = model;
+    connect(loadsModel, &QStandardItemModel::itemChanged, this, &SidebarWidget::nodeLoadChanged);
+
+    addNode();
+
+    ui->loadsTable->setModel(model);
+}
+
 void SidebarWidget::addCore(const Core &core)
 {
     addNode();
 
-    int row = ui->coresTable->rowCount();
+    int row = coresModel->rowCount();
 
-    ui->coresTable->insertRow(row);
+    coresModel->insertRow(row);
 
-    addTableItem(ui->coresTable, row, 0, core.length);
-    addTableItem(ui->coresTable, row, 1, core.area);
-    addTableItem(ui->coresTable, row, 2, core.elastic);
-    addTableItem(ui->coresTable, row, 3, core.strength);
-    addTableItem(ui->coresTable, row, 4, core.load);
+    setRowData(row, core);
 }
 
-void SidebarWidget::nodeLoadChanged(QTableWidgetItem *item) const
+void SidebarWidget::editCore(int index, const Core &core)
+{
+    setRowData(index, core);
+}
+
+void SidebarWidget::removeCore(int index)
+{
+    coresModel->removeRow(index);
+    coresModel->removeRow(index + 1);
+}
+
+void SidebarWidget::nodeLoadChanged(QStandardItem* item) const
 {
     int node = item->row();
     double f = item->data(Qt::DisplayRole).toDouble();
@@ -40,23 +67,72 @@ void SidebarWidget::nodeLoadChanged(QTableWidgetItem *item) const
     emit sgNodeLoadChanged(node, f);
 }
 
-void SidebarWidget::addTableItem(QTableWidget *table, int row, int column,
-                                 const QVariant &data, bool editable)
+void SidebarWidget::coresContextMenu(const QPoint &point)
 {
-    QTableWidgetItem* item = new QTableWidgetItem(data.toString());
+    if(ui->coresTable->indexAt(point).isValid())
+        onDataPlaceMenu(point);
+    else
+        onEmptyPlaceMenu(point);
+}
 
-    if(!editable)
-        item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-
-    table->setItem(row, column, item);
+void SidebarWidget::setModelItemData(QStandardItemModel *model, int row, int column,
+                                     const QVariant &data)
+{
+    model->setItem(row, column, new QStandardItem(data.toString()));
 }
 
 void SidebarWidget::addNode()
 {
-    int row = ui->loadsTable->rowCount();
+    int row = loadsModel->rowCount();
 
-    ui->loadsTable->insertRow(row);
+    loadsModel->insertRow(row);
 
-    addTableItem(ui->loadsTable, row, 0, row + 1);
-    addTableItem(ui->loadsTable, row, 1, 0, true);
+    setModelItemData(loadsModel, row, 0, row + 1);
+    setModelItemData(loadsModel, row, 1, 0);
+}
+
+void SidebarWidget::setRowData(int row, const Core &core)
+{
+    setModelItemData(coresModel, row, 0, core.length);
+    setModelItemData(coresModel, row, 1, core.area);
+    setModelItemData(coresModel, row, 2, core.elastic);
+    setModelItemData(coresModel, row, 3, core.strength);
+    setModelItemData(coresModel, row, 4, core.load);
+}
+
+void SidebarWidget::onEmptyPlaceMenu(const QPoint& point)
+{
+    QMenu* menu = new QMenu(this);
+
+    QAction* createCore = new QAction("Добавить стержень");
+    connect(createCore, &QAction::triggered, this, &SidebarWidget::addCoreRequest);
+    menu->addAction(createCore);
+
+    menu->exec(ui->coresTable->viewport()->mapToGlobal(point));
+
+    menu->deleteLater();
+}
+
+void SidebarWidget::onDataPlaceMenu(const QPoint& point)
+{
+    int row = ui->coresTable->indexAt(point).row();
+
+    QMenu* menu = new QMenu(this);
+
+    QAction* createCore = new QAction("Добавить стержень");
+    connect(createCore, &QAction::triggered, this, &SidebarWidget::addCoreRequest);
+    menu->addAction(createCore);
+
+
+    QAction* editCore = new QAction("Редактировать");
+    connect(editCore, &QAction::triggered, [this, row] () { emit editCoreRequest(row);});
+    menu->addAction(editCore);
+
+    QAction* removeCore = new QAction("Удалить");
+    connect(removeCore, &QAction::triggered, [this, row] () { emit removeCoreRequest(row);});
+    menu->addAction(removeCore);
+
+    menu->exec(ui->coresTable->viewport()->mapToGlobal(point));
+
+    menu->deleteLater();
 }

@@ -74,7 +74,15 @@
     <property name="title">
      <string>Редактирование</string>
     </property>
+    <widget class="QMenu" name="supportsMenu">
+     <property name="title">
+      <string>Опоры</string>
+     </property>
+     <addaction name="leftSuppAction"/>
+     <addaction name="rightSuppAction"/>
+    </widget>
     <addaction name="newCoreAction"/>
+    <addaction name="supportsMenu"/>
    </widget>
    <addaction name="file"/>
    <addaction name="edit"/>
@@ -91,6 +99,22 @@
   <action name="newCoreAction">
    <property name="text">
     <string>Добавить стержень</string>
+   </property>
+  </action>
+  <action name="leftSuppAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Левая</string>
+   </property>
+  </action>
+  <action name="rightSuppAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Правая</string>
    </property>
   </action>
  </widget>

@@ -10,6 +10,16 @@ NewCoreDialog::NewCoreDialog(QWidget *parent)
     initUi();
 }
 
+NewCoreDialog::NewCoreDialog(const Core &data, QWidget *parent)
+    : QDialog(parent),
+      ui(new Ui::NewCoreDialog)
+{
+    ui->setupUi(this);
+
+    initUi();
+    setData(data);
+}
+
 NewCoreDialog::~NewCoreDialog()
 {
     delete ui;
@@ -33,7 +43,11 @@ bool NewCoreDialog::isValid() const
             isFieldTextValid(ui->areaEdit) &&
             isFieldTextValid(ui->elasticEdit) &&
             isFieldTextValid(ui->strengthEdit) &&
-            isFieldTextValid(ui->loadEdit);
+            isFieldTextValid(ui->loadEdit) &&
+            ui->lengthEdit->text().toDouble() != 0 &&
+            ui->areaEdit->text().toDouble() != 0;// &&
+//            ui->elasticEdit->text().toDouble() != 0 &&
+//            ui->strengthEdit->text().toDouble() != 0;
 }
 
 void NewCoreDialog::accept()
@@ -65,6 +79,15 @@ void NewCoreDialog::initUi()
     ui->strengthEdit->setValidator(doubleValidator);
 
     ui->loadEdit->setValidator(new QDoubleValidator{});
+}
+
+void NewCoreDialog::setData(const Core &data)
+{
+    ui->lengthEdit->setText(QString::number(data.length));
+    ui->areaEdit->setText(QString::number(data.area));
+    ui->elasticEdit->setText(QString::number(data.elastic));
+    ui->strengthEdit->setText(QString::number(data.strength));
+    ui->loadEdit->setText(QString::number(data.load));
 }
 
 bool NewCoreDialog::isFieldTextValid(QLineEdit *field) const
