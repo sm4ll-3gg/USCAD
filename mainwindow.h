@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "declarations.h"
+
 #include <QMainWindow>
 #include <QStandardItemModel>
 
@@ -24,6 +26,8 @@ public slots:
     void    importProject();
     void    exportProject();
 
+    void    reset();
+
     void    addCore();
     void    editCore(int index);
     void    removeCore(int core);
@@ -39,6 +43,15 @@ private: // Methods
     QJsonObject     serializeCore(int row) const;
     QJsonArray      serializeLoads() const;
     QJsonObject     serializeSupports() const;
+
+    void    deserialize(const QJsonObject& project);
+    bool    deserializeCores(const QJsonArray& cores);
+    Core    deserializeCore(const QJsonObject& json) const;
+    bool    deserializeLoads(const QJsonArray& loads);
+    bool    deserializeSupports(const QJsonObject& supports);
+    void    projectImportError();
+
+    void    projectIOError(const QString &title, const QString& error);
 
     void    addCoresTableItem(int row, int column, QVariant data);
 

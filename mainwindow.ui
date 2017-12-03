@@ -102,6 +102,9 @@
    <property name="text">
     <string>Добавить стержень</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="leftSuppAction">
    <property name="checkable">
@@ -109,6 +112,9 @@
    </property>
    <property name="text">
     <string>Левая</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
    </property>
   </action>
   <action name="rightSuppAction">
@@ -118,15 +124,24 @@
    <property name="text">
     <string>Правая</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
+   </property>
   </action>
   <action name="importAction">
    <property name="text">
     <string>Импорт...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
   </action>
   <action name="exportAction">
    <property name="text">
     <string>Экспорт...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

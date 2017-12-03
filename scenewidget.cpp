@@ -8,18 +8,6 @@ SceneWidget::SceneWidget(QWidget *parent)
     : QFrame(parent)
 {}
 
-void SceneWidget::setHasLeftSupport(bool has)
-{
-    hasLeftSupport = has;
-    repaint();
-}
-
-void SceneWidget::setHasRightSupport(bool has)
-{
-    hasRightSupport = has;
-    repaint();
-}
-
 Core SceneWidget::core(int index) const
 {
     Core core{};

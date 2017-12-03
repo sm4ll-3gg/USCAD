@@ -29,8 +29,8 @@ public:
 
     void    addCLoad(int node, double f);
 
-    void    setHasLeftSupport(bool has);
-    void    setHasRightSupport(bool has);
+    void    setHasLeftSupport(bool has)  { hasLeftSupport = has; }
+    void    setHasRightSupport(bool has) { hasRightSupport = has; }
 
     Core    core(int index) const;
 
