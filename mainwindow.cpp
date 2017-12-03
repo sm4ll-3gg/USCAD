@@ -18,21 +18,24 @@ MainWindow::MainWindow(QWidget *parent) :
     coresModel = new QStandardItemModel(0, 5, this);
     coresModel->setHorizontalHeaderLabels({"L", "A", "E", "S", "q"});
     ui->sidebarWidget->setCoresTableModel(coresModel);
+    ui->srcFrame->setCores(coresModel);
 
-    loadsModel = new LoadsModel(0, 2, this);
-    loadsModel->setHorizontalHeaderLabels({"Node", "F"});
+    loadsModel = new QStandardItemModel(0, 1, this);
+    loadsModel->setHorizontalHeaderLabels({"F"});
     ui->sidebarWidget->setLoadsTableModel(loadsModel);
+    ui->srcFrame->setCLoads(loadsModel);
 
     connect(ui->newCoreAction,  &QAction::triggered,  this,   &MainWindow::addCore);
 
     connect(ui->leftSuppAction,  &QAction::toggled,    this,   &MainWindow::leftSupportToggled);
     connect(ui->rightSuppAction, &QAction::toggled,    this,   &MainWindow::rightSupportToggled);
 
+    connect(ui->sidebarWidget,  SIGNAL(dataChanged()),
+            ui->srcFrame,       SLOT(repaint()));
+
     connect(ui->sidebarWidget,  &SidebarWidget::addCoreRequest,     this,  &MainWindow::addCore);
     connect(ui->sidebarWidget,  &SidebarWidget::editCoreRequest,    this,  &MainWindow::editCore);
     connect(ui->sidebarWidget,  &SidebarWidget::removeCoreRequest,  this,  &MainWindow::removeCore);
-
-    connect(ui->sidebarWidget,  &SidebarWidget::sgNodeLoadChanged,  this,   &MainWindow::addCLoad);
 }
 
 MainWindow::~MainWindow()
@@ -50,7 +53,6 @@ void MainWindow::addCore()
     Core core = dialog->data();
 
     ui->sidebarWidget->addCore(core);
-   // ui->srcFrame->addCore(core);
 }
 
 void MainWindow::editCore(int index)
@@ -63,7 +65,6 @@ void MainWindow::editCore(int index)
     Core core = dialog->data();
 
     ui->sidebarWidget->editCore(index, core);
-    ui->srcFrame->editCore(index, core);
 }
 
 void MainWindow::removeCore(int core)
@@ -78,12 +79,6 @@ void MainWindow::removeCore(int core)
         return;
 
     ui->sidebarWidget->removeCore(core);
-    ui->srcFrame->removeCore(core);
-}
-
-void MainWindow::addCLoad(int node, double f)
-{
-    ui->srcFrame->addCLoad(node, f);
 }
 
 void MainWindow::leftSupportToggled(bool checked)

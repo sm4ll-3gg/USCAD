@@ -33,6 +33,8 @@ signals:
     void    editCoreRequest(int core);
     void    removeCoreRequest(int core);
 
+    void    dataChanged();
+
 private slots:
     void    nodeLoadChanged(QStandardItem *item) const;
 

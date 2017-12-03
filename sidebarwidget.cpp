@@ -23,6 +23,7 @@ SidebarWidget::~SidebarWidget()
 void SidebarWidget::setCoresTableModel(QStandardItemModel *model)
 {
     coresModel = model;
+    connect(coresModel, &QStandardItemModel::dataChanged, this, &SidebarWidget::dataChanged);
 
     ui->coresTable->setModel(model);
 }
@@ -31,6 +32,7 @@ void SidebarWidget::setLoadsTableModel(QStandardItemModel *model)
 {
     loadsModel = model;
     connect(loadsModel, &QStandardItemModel::itemChanged, this, &SidebarWidget::nodeLoadChanged);
+    connect(loadsModel, &QStandardItemModel::dataChanged, this, &SidebarWidget::dataChanged);
 
     addNode();
 
@@ -56,7 +58,9 @@ void SidebarWidget::editCore(int index, const Core &core)
 void SidebarWidget::removeCore(int index)
 {
     coresModel->removeRow(index);
-    coresModel->removeRow(index + 1);
+    loadsModel->removeRow(index + 1);
+
+    emit dataChanged();
 }
 
 void SidebarWidget::nodeLoadChanged(QStandardItem* item) const
@@ -86,9 +90,7 @@ void SidebarWidget::addNode()
     int row = loadsModel->rowCount();
 
     loadsModel->insertRow(row);
-
-    setModelItemData(loadsModel, row, 0, row + 1);
-    setModelItemData(loadsModel, row, 1, 0);
+    setModelItemData(loadsModel, row, 0, 0);
 }
 
 void SidebarWidget::setRowData(int row, const Core &core)

@@ -19,11 +19,9 @@ public:
     ~MainWindow();
 
 public slots:
-    void    addCore(); // Дублирование данных, если будет не лень переписать, используя модель
+    void    addCore();
     void    editCore(int index);
     void    removeCore(int core);
-
-    void    addCLoad(int node, double f);
 
 private slots:
     void    leftSupportToggled(bool checked);

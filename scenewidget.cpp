@@ -8,33 +8,6 @@ SceneWidget::SceneWidget(QWidget *parent)
     : QFrame(parent)
 {}
 
-void SceneWidget::addCore(const Core &core)
-{
-    cores.append(core);
-    cLoads.append(0);
-    repaint();
-}
-
-void SceneWidget::editCore(int index, const Core &core)
-{
-    cores[index] = core;
-    repaint();
-}
-
-void SceneWidget::removeCore(int index)
-{
-    cores.remove(index);
-    cLoads.remove(index + 1);
-
-    repaint();
-}
-
-void SceneWidget::addCLoad(int node, double f)
-{
-    //cLoads[node] = f;
-    repaint();
-}
-
 void SceneWidget::setHasLeftSupport(bool has)
 {
     hasLeftSupport = has;
@@ -45,6 +18,19 @@ void SceneWidget::setHasRightSupport(bool has)
 {
     hasRightSupport = has;
     repaint();
+}
+
+Core SceneWidget::core(int index) const
+{
+    Core core{};
+
+    core.length   = cores->index(index, 0).data().toDouble();
+    core.area     = cores->index(index, 1).data().toDouble();
+    core.elastic  = cores->index(index, 2).data().toDouble();
+    core.strength = cores->index(index, 3).data().toDouble();
+    core.load     = cores->index(index, 4).data().toDouble();
+
+    return core;
 }
 
 void SceneWidget::paintEvent(QPaintEvent *event)
@@ -73,11 +59,12 @@ void SceneWidget::drawConstruction(QPainter &painter)
 {
     qreal pos = X_BEGIN_POS;
 
-    if(hasLeftSupport && cores.size() != 0)
-        drawLeftSupport(painter, pos, cores[0].area * scale);
+    if(hasLeftSupport && cores->rowCount() != 0)
+        drawLeftSupport(painter, pos, core(0).area * scale);
 
-    for(Core core : cores)
+    for(int i = 0; i < cores->rowCount(); ++ i)
     {
+        Core core = this->core(i);
         drawCore(painter, core.length, core.area, pos);
 
         if(core.load != 0)
@@ -86,8 +73,8 @@ void SceneWidget::drawConstruction(QPainter &painter)
         pos += core.length * scale;
     }
 
-    if(hasRightSupport && cores.size() != 0)
-        drawRightSupport(painter, pos, cores.last().area * scale);
+    if(hasRightSupport && cores->rowCount() != 0)
+        drawRightSupport(painter, pos, core(cores->rowCount() - 1).area * scale);
 }
 
 void SceneWidget::drawCore(QPainter &painter, qreal length, qreal area, qreal xBeginPos)
@@ -133,13 +120,13 @@ void SceneWidget::drawDistributedLoad(QPainter &painter, qreal length,
 void SceneWidget::drawConcentratedLoads(QPainter &painter)
 {
     qreal pos = X_BEGIN_POS;
-    for(int node = 0; node <= cores.size(); ++node)
+    for(int node = 0; node < cLoads->rowCount(); ++node)
     {
-        const double F = cLoads[node];
+        const double F = cLoads->index(node, 0).data().toDouble();
 
         qreal endPos = pos;
-        if(node < cores.size())
-            endPos += cores[node].length * scale;
+        if(node < cores->rowCount())
+            endPos += core(node).length * scale;
 
         if(F == 0)
         {
@@ -205,8 +192,10 @@ SceneWidget::Params SceneWidget::calcParams() const
 {
     Params p{};
 
-    for(const Core& core : cores)
+    for(int i = 0; i < cores->rowCount(); ++i)
     {
+        Core core = this->core(i);
+
         p.length = p.length + core.length * scale;
 
         qreal area = core.area * scale;

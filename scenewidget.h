@@ -19,6 +19,9 @@ class SceneWidget : public QFrame
 public:
     explicit SceneWidget(QWidget *parent = Q_NULLPTR);
 
+    void    setCores(QStandardItemModel* model)  { cores = model;  }
+    void    setCLoads(QStandardItemModel* model) { cLoads = model; }
+
     void    addCore(const Core& core);
     void    editCore(int index, const Core& core);
     void    removeCore(int index);
@@ -28,7 +31,7 @@ public:
     void    setHasLeftSupport(bool has);
     void    setHasRightSupport(bool has);
 
-    const Core& core(int index) const { return cores[index]; }
+    Core    core(int index) const;
 
 protected:
     void    paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
@@ -50,8 +53,8 @@ private: // Methods
     Params  calcParams() const;
 
 private:
-    QVector<Core>   cores{};
-    QVector<qreal>  cLoads{0};
+    QStandardItemModel* cores;
+    QStandardItemModel* cLoads;
 
     bool                hasLeftSupport{false};
     bool                hasRightSupport{false};
