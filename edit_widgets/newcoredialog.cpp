@@ -1,6 +1,8 @@
 #include "newcoredialog.h"
 #include "ui_newcoredialog.h"
 
+#include <QDebug>
+
 NewCoreDialog::NewCoreDialog(QWidget *parent)
     : QDialog(parent),
       ui(new Ui::NewCoreDialog)
@@ -72,6 +74,7 @@ void NewCoreDialog::initUi()
 
     QDoubleValidator* doubleValidator = new QDoubleValidator{};
     doubleValidator->setBottom(0);
+    //doubleValidator->setLocale(QLocale::English);
 
     ui->lengthEdit->setValidator(doubleValidator);
     ui->areaEdit->setValidator(doubleValidator);

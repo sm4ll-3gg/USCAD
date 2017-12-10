@@ -30,14 +30,18 @@ SOURCES += \
         mainwindow.cpp \
     sidebarwidget.cpp \
     edit_widgets/newcoredialog.cpp \
-    scenewidget.cpp
+    scenewidget.cpp \
+    processor/processor.cpp \
+    import-export.cpp \
+    processor/cramer.cpp
 
 HEADERS += \
         mainwindow.h \
     sidebarwidget.h \
     edit_widgets/newcoredialog.h \
     declarations.h \
-    scenewidget.h
+    scenewidget.h \
+    processor/processor.h
 
 FORMS += \
         mainwindow.ui \

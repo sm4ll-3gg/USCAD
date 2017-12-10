@@ -71,6 +71,8 @@
     </property>
     <addaction name="importAction"/>
     <addaction name="exportAction"/>
+    <addaction name="separator"/>
+    <addaction name="calculateAction"/>
    </widget>
    <widget class="QMenu" name="edit">
     <property name="title">
@@ -114,7 +116,7 @@
     <string>Левая</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Right</string>
+    <string>Ctrl+Left</string>
    </property>
   </action>
   <action name="rightSuppAction">
@@ -125,7 +127,7 @@
     <string>Правая</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Left</string>
+    <string>Ctrl+Right</string>
    </property>
   </action>
   <action name="importAction">
@@ -142,6 +144,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="calculateAction">
+   <property name="text">
+    <string>Рассчитать</string>
    </property>
   </action>
  </widget>

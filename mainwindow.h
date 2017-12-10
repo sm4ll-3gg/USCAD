@@ -23,6 +23,7 @@ public:
     ~MainWindow();
 
 public slots:
+    // import-export.cpp
     void    importProject();
     void    exportProject();
 
@@ -32,11 +33,14 @@ public slots:
     void    editCore(int index);
     void    removeCore(int core);
 
+    void    runProcessor();
+
 private slots:
     void    leftSupportToggled(bool checked);
     void    rightSupportToggled(bool checked);
 
 private: // Methods
+    // import-export.cpp
     QJsonDocument   serialize() const;
 
     QJsonArray      serializeCores() const;
@@ -52,6 +56,7 @@ private: // Methods
     void    projectImportError();
 
     void    projectIOError(const QString &title, const QString& error);
+    // ------------------
 
     void    addCoresTableItem(int row, int column, QVariant data);
 
