@@ -14,14 +14,16 @@ class Processor : public QObject
     using Matrix = QVector<Row   >;
 
 public:
-    explicit Processor(QVector<Core>&& construction, QVector<double>&& loads,
+    explicit Processor(QVector<Core>&& cores, QVector<double>&& loads,
                        bool hasLeft, bool hasRigth, QObject *parent = Q_NULLPTR);
 
-    void    calculate() const;
+    void    calculate();
 
 private: // Methods
     Matrix  makeMatrix() const;
     Row     makeRow(int index) const;
+
+    void    fixLoads();
 
     double  value(const Core& core) const;
 
@@ -34,7 +36,7 @@ private: // Methods
     Matrix  cut(const Matrix &matrix, int column) const;
 
 private:
-    QVector<Core>   construction;
+    QVector<Core>   cores;
     QVector<double> loads;
 
     // Supports
