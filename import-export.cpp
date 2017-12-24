@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QJsonParseError>
+#include <QTableWidgetItem>
 
 void MainWindow::importProject()
 {
@@ -32,8 +33,7 @@ void MainWindow::importProject()
         return;
     }
 
-    coresModel->setRowCount(0);
-    loadsModel->setRowCount(0);
+    reset();
 
     deserialize(project.object());
 }

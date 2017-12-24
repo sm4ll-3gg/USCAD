@@ -2,6 +2,7 @@
 #define SIDEBARWIDGET_H
 
 #include "declarations.h"
+#include "scenewidget.h"
 
 #include <QTableWidget>
 #include <QStandardItemModel>
@@ -26,6 +27,8 @@ public:
     void    editCore(int index, const Core& core);
     void    removeCore(int index);
 
+    int     pointCount() const;
+
 signals:
     void    sgNodeLoadChanged(int node, double f) const;
 
@@ -33,10 +36,18 @@ signals:
     void    editCoreRequest(int core);
     void    removeCoreRequest(int core);
 
+    void    sgPointCalcRequested(int core, double pos) const;
+
+    void    sgSwitchStressType(SceneWidget::StressType type);
+
     void    dataChanged();
 
 private slots:
     void    nodeLoadChanged(QStandardItem *item) const;
+
+    void    calcButtonClicked() const;
+
+    void    calcCoreChanged(int core) const;
 
     void    coresContextMenu(const QPoint& point);
 

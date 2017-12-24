@@ -3,6 +3,8 @@
 
 #include "declarations.h"
 
+#include "processor/processor.h"
+
 #include <QMainWindow>
 #include <QStandardItemModel>
 
@@ -39,6 +41,8 @@ private slots:
     void    leftSupportToggled(bool checked);
     void    rightSupportToggled(bool checked);
 
+    void    pointCalc(int core, double pos);
+
 private: // Methods
     // import-export.cpp
     QJsonDocument   serialize() const;
@@ -60,9 +64,13 @@ private: // Methods
 
     void    addCoresTableItem(int row, int column, QVariant data);
 
+    void    showCalcResults(const QVector<QVector<Stress> > &result);
+
 private:
     QStandardItemModel* coresModel;
     QStandardItemModel* loadsModel;
+
+    Processor   processor{this};
 
     Ui::MainWindow *ui;
 };

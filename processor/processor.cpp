@@ -1,15 +1,26 @@
 #include "processor.h"
 
+#include "math.h"
+
 #include <QDebug>
 
-Processor::Processor(QVector<Core> &&construction, QVector<double> &&loads,
-                     bool hasLeft, bool hasRigth, QObject *parent)
-    : QObject(parent),
-      cores(construction), loads(loads), hasLeft(hasLeft), hasRigth(hasRigth)
+Processor::Processor(QObject *parent)
+    : QObject(parent)
 {}
 
-void Processor::calculate()
+void Processor::setSupports(bool left, bool rigth)
 {
+    hasLeft = left;
+    hasRigth = rigth;
+}
+
+void Processor::prepare()
+{
+    qDebug() << endl << "--------- Prepare";
+
+    uBegin.clear();
+    uEnd.clear();
+
     Matrix matrix = makeMatrix();
     fixLoads();
 
@@ -28,23 +39,86 @@ void Processor::calculate()
     }
 
     Row deltas = cramer(matrix, loads);
-    qDebug() << "cramer: " << deltas;
-    Row nx(deltas.size() - 1);
+    qDebug() << "deltas" << deltas;
 
-    for (int i = 0; i < nx.size(); i++)
+    for (int i = 0; i < deltas.size() - 1; i++)
     {
-        const Core& core = cores[i];
-        double val = value(core);
-        nx[i] = -val*deltas[i] + val*deltas[i + 1] - core.load*core.length/2;
+        uBegin.append(deltas[i]);
+        uEnd.append(deltas[i + 1]);
     }
 
-    Row sigma(nx.size());
-    for (int i = 0; i < sigma.size(); i++)
+    qDebug() << "Ubegin" << uBegin << endl << "Uend" << uEnd;
+
+//    qDebug() << "cramer: " << deltas;
+//    Row nx(deltas.size() - 1);
+
+//    for (int i = 0; i < nx.size(); i++)
+//    {
+//        const Core& core = cores[i];
+//        double val = value(core);
+//        nx[i] = -val*deltas[i] + val*deltas[i + 1] - core.load*core.length/2;
+//    }
+
+//    Row sigma(nx.size());
+//    for (int i = 0; i < sigma.size(); i++)
+//    {
+//        sigma[i] = nx[i] / cores[i].area;
+//    }
+
+    //    qDebug() << deltas << nx << sigma;
+}
+
+QVector<QVector<Stress>> Processor::calculate(int partCount)
+{
+    QVector<QVector<Stress>> res(cores.size(), QVector<Stress>(partCount + 1));
+
+    for (int i = 0; i < cores.size(); i++)
     {
-        sigma[i] = nx[i] / cores[i].area;
+        Core core = cores[i];
+
+        double offset = core.length / partCount;
+        double pos = 0;
+        for (int j = 0; j <= partCount; j++)
+        {
+            res[i][j] = calcInPoint(i, pos);
+            res[i][j].pos = pos;
+
+            pos += offset;
+        }
     }
 
-    qDebug() << deltas << nx << sigma;
+    return res;
+}
+
+Stress Processor::calcInPoint(int coreIndex, double pos) const
+{
+    double n = nx(coreIndex, pos);
+    double u = ux(coreIndex, pos);
+    double s = sx(coreIndex, n);
+
+    return {n, u, s};
+}
+
+double Processor::nx(int i, double pos) const
+{
+    Core core = cores[i];
+
+    return value(core) * (uEnd[i] - uBegin[i]) + core.load*core.length/2 * (1 - 2*pos/core.length);
+}
+
+double Processor::sx(int i, double nx) const
+{
+    return nx / cores[i].area;
+}
+
+double Processor::ux(int i, double pos) const
+{
+    Core core = cores[i];
+
+    double k = core.load*pow(core.length, 2) / 2*core.elastic*core.area;
+    double m = pos/core.length;
+
+    return uBegin[i] +  m*(uEnd[i] - uBegin[i]) + k*m * (1 - m);
 }
 
 Processor::Matrix Processor::makeMatrix() const

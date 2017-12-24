@@ -14,10 +14,17 @@ class Processor : public QObject
     using Matrix = QVector<Row   >;
 
 public:
-    explicit Processor(QVector<Core>&& cores, QVector<double>&& loads,
-                       bool hasLeft, bool hasRigth, QObject *parent = Q_NULLPTR);
+    explicit Processor(QObject *parent = Q_NULLPTR);
 
-    void    calculate();
+    void    setCores(QVector<Core>&& c)  { cores = c; }
+    void    setLoads(QVector<double>&& l) { loads = l; }
+    void    setSupports(bool left, bool rigth);
+    void    setPointCount(int count) { pointCount = count; }
+
+    void            prepare();
+    QVector<QVector<Stress>>    calculate(int partCount);
+
+    Stress  calcInPoint(int coreIndex, double pos) const;
 
 private: // Methods
     Matrix  makeMatrix() const;
@@ -26,6 +33,10 @@ private: // Methods
     void    fixLoads();
 
     double  value(const Core& core) const;
+
+    double  nx(int coreIndex, double pos) const;
+    double  sx(int coreIndex, double nx)  const;
+    double  ux(int coreIndex, double pos) const;
 
     // gauss.cpp
     Row     cramer(const Matrix& matrix, const Row& loads) const;
@@ -39,9 +50,14 @@ private:
     QVector<Core>   cores;
     QVector<double> loads;
 
+    QVector<double> uBegin;
+    QVector<double> uEnd;
+
     // Supports
     bool    hasLeft;
     bool    hasRigth;
+
+    int     pointCount{0};
 };
 
 #endif // PROCESSOR_H

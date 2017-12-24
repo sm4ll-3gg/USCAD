@@ -16,4 +16,18 @@ struct Core
     double  load{0};
 };
 
+struct Stress
+{
+    Stress() {}
+
+    Stress(double nx, double sx, double ux)
+        :nx(nx), sx(sx), ux(ux)
+    {}
+
+    double  pos{0};
+    double  nx{0};
+    double  sx{0};
+    double  ux{0};
+};
+
 #endif // DECLARATIONS_H

@@ -8,6 +8,12 @@ SceneWidget::SceneWidget(QWidget *parent)
     : QFrame(parent)
 {}
 
+void SceneWidget::setResult(const QVector<QVector<Stress> > &res)
+{
+    result = res;
+    repaint();
+}
+
 Core SceneWidget::core(int index) const
 {
     Core core{};
@@ -33,6 +39,9 @@ void SceneWidget::paintEvent(QPaintEvent *event)
     drawAxis(painter);
     drawConstruction(painter);
     drawConcentratedLoads(painter);
+
+    if(!result.isEmpty())
+        drawResult(painter);
 }
 
 void SceneWidget::drawAxis(QPainter &painter)
@@ -166,6 +175,79 @@ void SceneWidget::drawRightSupport(QPainter &painter, qreal xPos, qreal height)
 
     for(qreal curr = startYPos; curr <= startYPos + height; curr += 10)
         painter.drawLine(xPos, curr, xPos + 10, curr + 10);
+}
+
+void SceneWidget::drawResult(QPainter &painter)
+{
+    qreal min = 0;
+    qreal max = 0;
+    for (int i = 0; i < result.size(); i++)
+    {
+        for (int j = 0; j < result[i].size(); j++)
+        {
+            qreal val = stressVal(result[i][j]);
+            if (val < min)
+                min = val;
+            if (val > max)
+                max = val;
+        }
+    }
+
+    qreal down = 0;
+    qreal width = 0;
+    for (int i = 0; i < cores->rowCount(); i++)
+    {
+        width += core(i).length * scale;
+        painter.drawLine(width + X_BEGIN_POS, rect().height() / 2,
+                         width + X_BEGIN_POS, rect().height());
+        if (core(i).area / 2 * scale > down)
+            down = core(i).area / 2 * scale;
+    }
+
+    qreal downStart = rect().height() / 2 + down + 20;
+    qreal diff = rect().height() - downStart;
+
+    qreal sScale = diff / (max - min);
+    qreal hStep = width / (result.size() * result[0].size());
+
+    QPen line(Qt::black, 1, Qt::SolidLine);
+
+    painter.setPen(line);
+    painter.drawLine(X_BEGIN_POS, rect().height() / 2, X_BEGIN_POS, rect().height());
+
+    qreal pos = X_BEGIN_POS;
+    const qreal Y_POS = downStart + max * sScale - 10;
+
+    QPolygon level;
+    level.append(QPoint(pos, Y_POS));
+
+    for (int i = 0; i < result.size(); i++)
+    {
+        hStep = core(i).length * scale / result[i].size();
+        for (int j = 0; j < result[i].size(); j++)
+        {
+            level.append(QPoint(pos, Y_POS - stressVal(result[i][j])*sScale));
+            pos += hStep;
+        }
+    }
+
+    level.append(QPoint(pos, Y_POS));
+
+    //painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::VerPattern);
+    painter.drawPolygon(level);
+}
+
+qreal SceneWidget::stressVal(const Stress &stress) const
+{
+    switch (st) {
+    case NX:
+        return stress.nx;
+    case UX:
+        return stress.ux;
+    case SX:
+        return stress.sx;
+    }
 }
 
 qreal SceneWidget::calcScale(const Params &params) const

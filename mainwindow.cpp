@@ -3,11 +3,10 @@
 
 #include "declarations.h"
 
-#include "processor/processor.h"
-
 #include "edit_widgets/newcoredialog.h"
 
 #include <QMessageBox>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -41,6 +40,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->sidebarWidget,  &SidebarWidget::addCoreRequest,     this,  &MainWindow::addCore);
     connect(ui->sidebarWidget,  &SidebarWidget::editCoreRequest,    this,  &MainWindow::editCore);
     connect(ui->sidebarWidget,  &SidebarWidget::removeCoreRequest,  this,  &MainWindow::removeCore);
+
+    connect(ui->sidebarWidget, &SidebarWidget::sgPointCalcRequested, this, &MainWindow::pointCalc);
+
+    connect(ui->sidebarWidget, &SidebarWidget::sgSwitchStressType,
+            ui->srcFrame, &SceneWidget::setStressType);
 }
 
 MainWindow::~MainWindow()
@@ -57,6 +61,8 @@ void MainWindow::reset()
 
     ui->leftSuppAction->setChecked(false);
     ui->rightSuppAction->setChecked(false);
+
+    ui->srcFrame->setResult(QVector<QVector<Stress>>());
 }
 
 void MainWindow::addCore()
@@ -107,9 +113,16 @@ void MainWindow::runProcessor()
     for (int i = 0; i < loadsModel->rowCount(); i++)
         loads[i] = qvariant_cast<double>(loadsModel->index(i, 0).data());
 
-    Processor processor(std::move(cores), std::move(loads),
-                        ui->leftSuppAction->isChecked(), ui->rightSuppAction->isChecked(), this);
-    processor.calculate();
+    processor.setCores(std::move(cores));
+    processor.setLoads(std::move(loads));
+    processor.setSupports(ui->leftSuppAction->isChecked(), ui->rightSuppAction->isChecked());
+    processor.setPointCount(ui->sidebarWidget->pointCount());
+
+    processor.prepare();
+
+    QVector<QVector<Stress>> stress = processor.calculate(ui->sidebarWidget->pointCount());
+    showCalcResults(stress);
+    ui->srcFrame->setResult(stress);
 }
 
 void MainWindow::leftSupportToggled(bool checked)
@@ -122,4 +135,63 @@ void MainWindow::rightSupportToggled(bool checked)
 {
     ui->srcFrame->setHasRightSupport(checked);
     ui->srcFrame->repaint();
+}
+
+void MainWindow::pointCalc(int core, double pos)
+{
+    runProcessor();
+
+    Stress stress = processor.calcInPoint(core, pos);
+
+    QString text = QString("Результаты расчета в точке %1 стержня №%2:\n"
+                           "Nx = %3\n"
+                           "Ux = %4\n"
+                           "Sx = %5\n")
+            .arg(pos)
+            .arg(core)
+            .arg(stress.nx)
+            .arg(stress.ux)
+            .arg(stress.sx);
+
+    QMessageBox dialog(QMessageBox::Information, "Расчет в точке", text, QMessageBox::Ok, this);
+    dialog.exec();
+}
+
+void MainWindow::showCalcResults(const QVector<QVector<Stress>> &result)
+{
+    QVBoxLayout* layout = new QVBoxLayout();
+
+    for (int i = 0; i < result.size(); i++)
+    {
+        layout->addWidget(new QLabel(QString("Стержень №%1").arg(i + 1)));
+
+        QTableWidget* table = new QTableWidget(result[i].size(), 5, this);
+        table->setHorizontalHeaderLabels({"Pos", "Nx", "Ux", "Sx", "S"});
+
+        for (int j = 0; j < result[i].size(); j++)
+        {
+            Stress stress = result[i][j];
+
+            QTableWidgetItem* pos = new QTableWidgetItem(QString::number(stress.pos));
+            table->setItem(j, 0, pos);
+
+            QTableWidgetItem* nx = new QTableWidgetItem(QString::number(stress.nx));
+            table->setItem(j, 1, nx);
+
+            QTableWidgetItem* ux = new QTableWidgetItem(QString::number(stress.ux));
+            table->setItem(j, 2, ux);
+
+            QTableWidgetItem* sx = new QTableWidgetItem(QString::number(stress.sx));
+            table->setItem(j, 3, sx);
+        }
+
+        layout->addWidget(table);
+    }
+
+    QDialog* dialog = new QDialog(this);
+    dialog->setLayout(layout);
+
+    dialog->exec();
+
+    dialog->deleteLater();
 }

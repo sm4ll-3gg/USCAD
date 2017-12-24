@@ -13,6 +13,22 @@ SidebarWidget::SidebarWidget(QWidget *parent) :
     ui->coresTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->coresTable, &QTableWidget::customContextMenuRequested,
             this,           &SidebarWidget::coresContextMenu);
+
+    connect(ui->coreNumSpin,    SIGNAL(valueChanged(int)),
+            this,               SLOT  (calcCoreChanged(int)));
+    connect(ui->calcButton, &QPushButton::clicked, this, &SidebarWidget::calcButtonClicked);
+    connect(ui->stressType, &QComboBox::currentTextChanged, [=](const QString& text){
+        SceneWidget::StressType type = SceneWidget::StressType::NX;
+
+        if (text == "Nx")
+            type = SceneWidget::StressType::NX;
+        else if (text == "Ux")
+            type = SceneWidget::StressType::UX;
+        else if (text == "Sx")
+            type = SceneWidget::StressType::SX;
+
+        emit sgSwitchStressType(type);
+    });
 }
 
 SidebarWidget::~SidebarWidget()
@@ -48,6 +64,8 @@ void SidebarWidget::addCore(const Core &core)
     coresModel->insertRow(row);
 
     setRowData(row, core);
+
+    ui->coreNumSpin->setRange(1, row + 1);
 }
 
 void SidebarWidget::editCore(int index, const Core &core)
@@ -63,12 +81,35 @@ void SidebarWidget::removeCore(int index)
     emit dataChanged();
 }
 
+int SidebarWidget::pointCount() const
+{
+    return ui->partCountSpin->value();
+}
+
 void SidebarWidget::nodeLoadChanged(QStandardItem* item) const
 {
     int node = item->row();
     double f = item->data(Qt::DisplayRole).toDouble();
 
     emit sgNodeLoadChanged(node, f);
+}
+
+void SidebarWidget::calcButtonClicked() const
+{    
+    if(coresModel->rowCount() == 0)
+        return;
+
+    int core = ui->coreNumSpin->value() - 1;
+    int pos  = ui->pointSpin->value();
+
+    emit sgPointCalcRequested(core, pos);
+}
+
+void SidebarWidget::calcCoreChanged(int core) const
+{
+    double length = qvariant_cast<double>(coresModel->index(core - 1, 0).data());
+
+    ui->pointSpin->setMaximum(length);
 }
 
 void SidebarWidget::coresContextMenu(const QPoint &point)
